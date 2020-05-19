@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs/Subject';
 import { Book } from '../models/book.model';
+import Datasnapshot = firebase.database.DataSnapshot;
 import * as firebase from 'firebase';
 
 
@@ -18,7 +19,7 @@ export class BooksService {
   }
   getBooks() {
     firebase.database().ref('/books')
-      .on('value', (data) => {
+      .on('value', (data : Datasnapshot) => {
         this.books = data.val() ? data.val() : [];
         this.emitBooks();
       }
@@ -29,7 +30,7 @@ export class BooksService {
     return new Promise(
       (resolve, reject) => {
         firebase.database().ref('/books/' + id).once('value').then(
-          (data) => {
+          (data : Datasnapshot) => {
             resolve(data.val());
           }, (error) => {
             reject(error);
@@ -37,5 +38,23 @@ export class BooksService {
         );
       }
     );
+  }
+  createNewBook(newBook: Book) {
+    this.books.push(newBook);
+    this.saveBooks();
+    this.emitBooks();
+  }
+
+  removeBook(book: Book) {
+    const bookIndexToRemove = this.books.findIndex(
+      (bookEl) => {
+        if (bookEl === book) {
+          return true;
+        }
+      }
+    );
+    this.books.splice(bookIndexToRemove, 1);
+    this.saveBooks();
+    this.emitBooks();
   }
 }
