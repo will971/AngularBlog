@@ -7,6 +7,9 @@ import * as firebase from 'firebase';
 
 @Injectable()
 export class BooksService {
+  constructor(){
+    this.getBooks();
+  }
 
   books: Book[] = [];
   booksSubject = new Subject<Book[]>();
@@ -19,7 +22,7 @@ export class BooksService {
   }
   getBooks() {
     firebase.database().ref('/books')
-      .on('value', (data : Datasnapshot) => {
+      .on('value', (data: Datasnapshot) => {
         this.books = data.val() ? data.val() : [];
         this.emitBooks();
       }
@@ -30,7 +33,7 @@ export class BooksService {
     return new Promise(
       (resolve, reject) => {
         firebase.database().ref('/books/' + id).once('value').then(
-          (data : Datasnapshot) => {
+          (data: Datasnapshot) => {
             resolve(data.val());
           }, (error) => {
             reject(error);
